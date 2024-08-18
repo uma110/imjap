@@ -25,9 +25,15 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
+	e.GET("/", getFiles)
 	e.POST("/upload", uploadFile)
 
 	e.Logger.Fatal(e.Start(":8011"))
+}
+
+// e.GET("/", getFiles)
+func getFiles(c echo.Context) error {
+	return file.GetFilesHandler(c)
 }
 
 // e.POST("/upload", uploadFile)
