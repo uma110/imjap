@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net/http"
-	"os"
 
 	"github.com/imjap/pkg/file"
 	"github.com/joho/godotenv"
@@ -27,16 +25,9 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	e.GET("/", hello)
 	e.POST("/upload", uploadFile)
 
 	e.Logger.Fatal(e.Start(":8011"))
-}
-
-func hello(c echo.Context) error {
-	message := os.Getenv("SUPABASE_API_KEY")
-
-	return c.String(http.StatusOK, "Hello, World!"+message)
 }
 
 // e.POST("/upload", uploadFile)
