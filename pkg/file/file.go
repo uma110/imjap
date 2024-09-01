@@ -16,8 +16,8 @@ import (
 )
 
 var (
-	bucketId  string = "gotest-images"
-	projectId string = "jaurcadmqgccmhzllhxr"
+	bucketId  string = "images"
+	projectId string = "pxoevrjzbjwbcqmbhrcf"
 	rawUrl    string = fmt.Sprintf("https://%s.supabase.co/storage/v1", projectId)
 )
 
@@ -80,12 +80,17 @@ func GetFilesHandler(c echo.Context) error {
 	var apiKey string = os.Getenv("SUPABASE_API_KEY")
 	storageClient := storage_go.NewClient(rawUrl, apiKey, nil)
 
+	fmt.Println("test")
+
 	files, err := storageClient.ListFiles(bucketId, "", storage_go.FileSearchOptions{
 		Limit:  10,
 		Offset: 0,
 	})
 
+	fmt.Println(files)
+
 	if err != nil {
+		fmt.Println("aa", err)
 		errJson := map[string]string{
 			"statusCode":   strconv.Itoa(http.StatusInternalServerError),
 			"errorMessage": err.Error(),
