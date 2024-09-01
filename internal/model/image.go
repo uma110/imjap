@@ -1,6 +1,6 @@
-package response
+package model
 
-type File struct {
+type Image struct {
 	ID        string `json:"id"`
 	Name      string `json:"name"`
 	CreatedAt string `json:"createdAt"`
