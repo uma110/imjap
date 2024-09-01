@@ -50,8 +50,8 @@ func UploadHandler(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	// 読み込んだバッファからmimetypeを推定
-	mimeType := http.DetectContentType(buff)
-	if mimeType != "image/jpeg" && mimeType != "image/png" {
+	mimetype := http.DetectContentType(buff)
+	if mimetype != "image/jpeg" && mimetype != "image/png" {
 		return c.JSON(http.StatusInternalServerError, "許可されていないファイルタイプです。JPEGかPNGをアップロードしてください")
 	}
 	// 読み込んだバッファ分を戻す
@@ -63,7 +63,7 @@ func UploadHandler(c echo.Context) error {
 	uid, _ := uuid.NewRandom()
 	now := time.Now().Format("2006010215405")
 	filename := now + "-" + uid.String()
-	fileOptions := storage_go.FileOptions{ContentType: &mimeType}
+	fileOptions := storage_go.FileOptions{ContentType: &mimetype}
 	_, err = storageClient.UploadFile(bucketId, filename, src, fileOptions)
 	if err != nil {
 		errJson := map[string]string{
@@ -110,4 +110,31 @@ func GetFilesHandler(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, resFiles)
+}
+
+func GetFileHandler(c echo.Context) error {
+	filename := c.Param("name")
+	var apiKey string = os.Getenv("SUPABASE_API_KEY")
+	storageClient := storage_go.NewClient(rawUrl, apiKey, nil)
+
+	// ファイルのダウンロード
+	data, err := storageClient.DownloadFile(bucketId, filename)
+
+	if err != nil {
+		fmt.Println("err")
+		fmt.Println(err)
+		errJson := map[string]string{
+			"statusCode":   strconv.Itoa(http.StatusInternalServerError),
+			"errorMessage": err.Error(),
+		}
+		return c.JSON(http.StatusInternalServerError, errJson)
+	}
+
+	// ファイルのmimetypeの取得
+	// 読み込んだバッファからmimetypeを推定
+	mimetype := http.DetectContentType(data[:512])
+	c.Response().Writer.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+	c.Response().Writer.Header().Set("Content-Type", mimetype)
+
+	return c.Blob(http.StatusOK, mimetype, data)
 }
